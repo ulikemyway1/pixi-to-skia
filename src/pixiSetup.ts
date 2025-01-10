@@ -1,4 +1,6 @@
-import * as PIXI from 'pixi.js';
+import * as PIXI from "pixi.js";
+import { createButton } from "./components/button";
+import { createImgSprite } from "./components/imgSprite";
 
 /**
  * Создаёт Pixi-приложение, привязанное к canvas #pixi-canvas
@@ -12,7 +14,7 @@ export function createPixiApp(canvasId: string): PIXI.Application {
     width: canvas.width,
     height: canvas.height,
     view: canvas,
-    backgroundColor: 0x1099bb
+    backgroundColor: 0xffffff,
   });
   return app;
 }
@@ -20,13 +22,14 @@ export function createPixiApp(canvasId: string): PIXI.Application {
 export function createMainContainer(): PIXI.Container {
   const container = new PIXI.Container();
 
-  const g4 = new PIXI.Graphics()
- 
-   g4.lineStyle(10, '#ffff00', 1)
+  const g4 = new PIXI.Graphics();
 
-     .moveTo(0, 70).lineTo(150, 30)
+  g4.lineStyle(10, "#ffff00", 1)
 
-   g4.angle = 0;
+    .moveTo(0, 70)
+    .lineTo(150, 30);
+
+  g4.angle = 0;
 
   // Добавим несколько красных эллипсов
   for (let i = 0; i < 3; i++) {
@@ -40,52 +43,12 @@ export function createMainContainer(): PIXI.Container {
     container.addChild(g);
   }
 
-const button = new PIXI.Graphics();
-button.beginFill(0x5498db);
-button.drawRect(100,10,200,50);
-button.endFill();
-button.x = 0;
-button.y = 0;
+  const button = createButton("Add figure", () => addRandomFigure(container));
 
-button.interactive = true;
-button.on('pointerdown', () => {
-    console.log(`Knopochka vjata`);
-  });
+  const sprite = createImgSprite("/img/cat.jpeg", { x: 210, y: 210 });
 
-  button.on('pointerup', () => {
-    console.log(`Knopochka otjata`);
-    addRandomFigure(container);
-  });
-
-  button.on('pointerenter', () => {
-    button.tint = 0x2980b9;
-  });
-
-  button.on('pointerout', () => {
-    button.tint = 0xFFFFFF;
-  });
-
-  const text = new PIXI.Text('Add figure', {
-    fontFamily: 'Arial',
-    fontSize: 16,
-    fill: 0xffffff,
-    align: 'center',
-  });
-  
-  text.x = 170;
-  text.y = 25;
-
-
-const sprite = PIXI.Sprite.from('/img/cat.jpeg');
-
-
-sprite.x = 80;
-sprite.y = 100;
-sprite.anchor.set(0, 0);
-container.addChild(sprite);
-
-container.addChild(button);
-button.addChild(text);
+  container.addChild(sprite);
+  container.addChild(button);
 
   return container;
 }
@@ -94,12 +57,21 @@ button.addChild(text);
  * Функция добавляет случайную фигуру в контейнер.
  */
 export function addRandomFigure(container: PIXI.Container) {
-    const g = new PIXI.Graphics();
-    g.beginFill({ r: Math.random() *255, g: Math.random() *255, b: Math.random() *255, a: Math.random() });
-    g.drawRect(0,0,Math.floor(Math.random() *70),Math.floor(Math.random() *70));
-    g.endFill();
-    g.x = Math.floor(Math.random() * 600);
-    g.y = Math.floor(Math.random() * 600);;
-    container.addChild(g);
-
+  const g = new PIXI.Graphics();
+  g.beginFill({
+    r: Math.random() * 255,
+    g: Math.random() * 255,
+    b: Math.random() * 255,
+    a: Math.random(),
+  });
+  g.drawRect(
+    0,
+    0,
+    Math.floor(Math.random() * 70),
+    Math.floor(Math.random() * 70),
+  );
+  g.endFill();
+  g.x = Math.floor(Math.random() * 600);
+  g.y = Math.floor(Math.random() * 600);
+  container.addChild(g);
 }

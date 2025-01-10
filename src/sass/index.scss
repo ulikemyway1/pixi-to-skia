@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background: #171717;
+  color: #f4f3f3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#controls {
+  margin: 1rem;
+}
+
+.canvas-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.canvas-container {
+  background: #000000;
+  border: 1px solid #ff0000;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+canvas {
+  border: 2px solid #ff0000;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+}

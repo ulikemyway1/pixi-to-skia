@@ -1,16 +1,18 @@
-import * as PIXI from 'pixi.js';
-import { Canvas } from 'canvaskit-wasm';
+import * as PIXI from "pixi.js";
+import CanvasKit, { Canvas } from "canvaskit-wasm";
 
 // Глобальный список интерактивных объектов
-const interactiveObjects: Array<{ obj: PIXI.DisplayObject; bounds: PIXI.Rectangle }> = [];
+const interactiveObjects: Array<{
+  obj: PIXI.DisplayObject;
+  bounds: PIXI.Rectangle;
+}> = [];
 
 // Функция для преобразования контейнера PixiJS в Skia
 export function convertPixiContainerToSkia(
   container: PIXI.Container,
   skCanvas: Canvas,
-  canvasKit: typeof canvasKit
+  canvasKit: typeof CanvasKit,
 ) {
-
   interactiveObjects.length = 0;
 
   for (const child of container.children) {
@@ -22,7 +24,7 @@ export function convertPixiContainerToSkia(
 function drawDisplayObject(
   displayObject: PIXI.DisplayObject,
   skCanvas: Canvas,
-  canvasKit: typeof CanvasKit
+  canvasKit: typeof CanvasKit,
 ) {
   skCanvas.save();
 
@@ -53,21 +55,19 @@ function drawDisplayObject(
 
 function createMatrixM44(obj: PIXI.DisplayObject, canvasKit: typeof CanvasKit) {
   const { a, b, c, d, tx, ty } = obj.worldTransform;
-  const skMatrixM44 = [
-    a,  c,  0,  tx,
-    b,  d,  0,  ty,
-    0,  0,  1,  0,
-    0,  0,  0,  1
-  ];
+  const skMatrixM44 = [a, c, 0, tx, b, d, 0, ty, 0, 0, 1, 0, 0, 0, 0, 1];
   return skMatrixM44;
 }
 
 export function drawGraphics(
   displayObject: PIXI.DisplayObject,
   skCanvas: Canvas,
-  canvasKit: typeof CanvasKit
+  canvasKit: typeof CanvasKit,
 ): void {
-  const pixiColorToSkiaColor4f = (pixiColor: number, alpha: number = 1.0): Float32Array => {
+  const pixiColorToSkiaColor4f = (
+    pixiColor: number,
+    alpha: number = 1.0,
+  ): Float32Array => {
     const r = ((pixiColor >> 16) & 0xff) / 255;
     const g = ((pixiColor >> 8) & 0xff) / 255;
     const b = (pixiColor & 0xff) / 255;
@@ -88,17 +88,21 @@ export function drawGraphics(
         const shape = data.shape;
         const path = new canvasKit.Path();
 
-  
         if (shape instanceof PIXI.Ellipse) {
           const rect = canvasKit.XYWHRect(
             shape.x - shape.width,
             shape.y - shape.height,
             shape.width * 2,
-            shape.height * 2
+            shape.height * 2,
           );
           path.addOval(rect);
         } else if (shape instanceof PIXI.Rectangle) {
-          const rect = canvasKit.XYWHRect(shape.x, shape.y, shape.width, shape.height);
+          const rect = canvasKit.XYWHRect(
+            shape.x,
+            shape.y,
+            shape.width,
+            shape.height,
+          );
           path.addRect(rect);
         } else if (shape instanceof PIXI.Polygon) {
           const points = shape.points;
@@ -123,21 +127,27 @@ export function drawGraphics(
         if (data.lineStyle?.visible) {
           const strokeColor = data.lineStyle.color ?? 0x000000;
           const strokeAlpha = data.lineStyle.alpha ?? 1.0;
-          strokePaint.setColor(pixiColorToSkiaColor4f(strokeColor, strokeAlpha));
+          strokePaint.setColor(
+            pixiColorToSkiaColor4f(strokeColor, strokeAlpha),
+          );
           strokePaint.setStrokeWidth(data.lineStyle.width ?? 1);
 
-          const cap = data.lineStyle.cap ?? 'butt';
+          const cap = data.lineStyle.cap ?? "butt";
           strokePaint.setStrokeCap(
-            cap === 'round' ? canvasKit.StrokeCap.Round :
-            cap === 'square' ? canvasKit.StrokeCap.Square :
-            canvasKit.StrokeCap.Butt
+            cap === "round"
+              ? canvasKit.StrokeCap.Round
+              : cap === "square"
+                ? canvasKit.StrokeCap.Square
+                : canvasKit.StrokeCap.Butt,
           );
 
-          const join = data.lineStyle.join ?? 'miter';
+          const join = data.lineStyle.join ?? "miter";
           strokePaint.setStrokeJoin(
-            join === 'round' ? canvasKit.StrokeJoin.Round :
-            join === 'bevel' ? canvasKit.StrokeJoin.Bevel :
-            canvasKit.StrokeJoin.Miter
+            join === "round"
+              ? canvasKit.StrokeJoin.Round
+              : join === "bevel"
+                ? canvasKit.StrokeJoin.Bevel
+                : canvasKit.StrokeJoin.Miter,
           );
 
           strokePaint.setStrokeMiter(data.lineStyle.miterLimit ?? 10);
@@ -151,11 +161,16 @@ export function drawGraphics(
       strokePaint.delete();
     } else if (obj instanceof PIXI.Sprite) {
       const sprite = obj;
-      if (sprite.texture && sprite.texture.baseTexture && sprite.texture.baseTexture.resource) {
+      if (
+        sprite.texture &&
+        sprite.texture.baseTexture &&
+        sprite.texture.baseTexture.resource
+      ) {
         const resource = sprite.texture.baseTexture.resource;
         if (resource.source) {
           const imageElement = resource.source as HTMLImageElement;
-          const skImage = canvasKit.MakeImageFromCanvasImageSource(imageElement);
+          const skImage =
+            canvasKit.MakeImageFromCanvasImageSource(imageElement);
           if (skImage) {
             skCanvas.save();
 
@@ -163,19 +178,36 @@ export function drawGraphics(
             const anchorOffsetX = sprite.anchor.x * sprite.width;
             const anchorOffsetY = sprite.anchor.y * sprite.height;
             const skMatrixM44 = [
-              a,  c,  0,  0,
-              b,  d,  0,  0,
-              0,  0,  1,  0,
-              0,  0,  0,  1
+              a,
+              c,
+              0,
+              0,
+              b,
+              d,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
             ];
             skCanvas.concat(skMatrixM44);
 
-            const srcRect = canvasKit.XYWHRect(0, 0, skImage.width(), skImage.height());
+            const srcRect = canvasKit.XYWHRect(
+              0,
+              0,
+              skImage.width(),
+              skImage.height(),
+            );
             const destRect = canvasKit.XYWHRect(
               anchorOffsetX,
               anchorOffsetY,
               sprite.width,
-              sprite.height
+              sprite.height,
             );
             skCanvas.drawImageRect(skImage, srcRect, destRect, null);
             skCanvas.restore();
@@ -195,17 +227,19 @@ export function drawGraphics(
   processDisplayObject(displayObject);
 }
 
-
-
 // Функция проверки попадания точки внутрь прямоугольника
 function isPointInRect(x: number, y: number, rect: PIXI.Rectangle): boolean {
-  return x >= rect.x && x <= rect.x + rect.width &&
-         y >= rect.y && y <= rect.y + rect.height;
+  return (
+    x >= rect.x &&
+    x <= rect.x + rect.width &&
+    y >= rect.y &&
+    y <= rect.y + rect.height
+  );
 }
 
 export function setupInteractiveHandlers(skCanvasElement: HTMLCanvasElement) {
-  skCanvasElement.addEventListener('pointerdown', onPointerDown);
-  skCanvasElement.addEventListener('pointerup', onPointerUp);
+  skCanvasElement.addEventListener("pointerdown", onPointerDown);
+  skCanvasElement.addEventListener("pointerup", onPointerUp);
 }
 
 function onPointerDown(e: PointerEvent) {
@@ -215,7 +249,7 @@ function onPointerDown(e: PointerEvent) {
 
   for (const { obj, bounds } of interactiveObjects) {
     if (bounds && isPointInRect(x, y, bounds)) {
-      obj.emit && obj.emit('pointerdown', e);
+      obj.emit && obj.emit("pointerdown", e);
     }
   }
 }
@@ -227,7 +261,7 @@ function onPointerUp(e: PointerEvent) {
 
   for (const { obj, bounds } of interactiveObjects) {
     if (bounds && isPointInRect(x, y, bounds)) {
-      obj.emit && obj.emit('pointerup', e);
+      obj.emit && obj.emit("pointerup", e);
     }
   }
 }
