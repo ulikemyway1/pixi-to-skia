@@ -62,7 +62,7 @@ function createMatrixM44(obj: PIXI.DisplayObject, canvasKit: typeof CanvasKit) {
 export function drawGraphics(
   displayObject: PIXI.DisplayObject,
   skCanvas: Canvas,
-  canvasKit: typeof CanvasKit,
+  canvasKit: any,
 ): void {
   const pixiColorToSkiaColor4f = (
     pixiColor: number,
